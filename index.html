@@ -69,15 +69,15 @@
         .password-container {
             text-align: center;
             margin-bottom: 30px;
-            width: 100%; /* Занимает всю ширину */
+            width: 100%;
         }
 
         .password-dots {
             display: flex;
             gap: 15px;
             margin-bottom: 30px;
-            justify-content: center; /* Выравнивание по центру */
-            width: 100%; /* Занимает всю ширину */
+            justify-content: center;
+            width: 100%;
         }
 
         .password-dot {
@@ -101,7 +101,7 @@
             gap: 15px;
             max-width: 300px;
             width: 100%;
-            transform: translateX(-20px); /* Смещение содержимого влево */
+            transform: translateX(-20px);
         }
 
         .keyboard button {
@@ -114,10 +114,11 @@
             font-size: 24px;
             cursor: pointer;
             transition: background 0.3s;
+            outline: none; /* Убираем стандартное выделение */
         }
 
         .keyboard button:active {
-            background: #007bff;
+            background: #ff4444; /* Красный цвет при нажатии */
         }
 
         .error-message {
@@ -174,6 +175,15 @@
             grid-row: 4 / 5;
             grid-column: 3 / 4;
         }
+
+        /* Стили для заголовка "Придумайте пароль" */
+        #password-title {
+            color: black; /* Черный цвет текста */
+            border: 2px solid #ff4444; /* Красная граница */
+            padding: 10px; /* Отступы для текста */
+            border-radius: 10px; /* Закругленные углы */
+            display: inline-block; /* Чтобы граница оборачивала текст */
+        }
     </style>
 </head>
 <body>
@@ -185,7 +195,7 @@
     <!-- Основной контент -->
     <div id="main-content">
         <div class="password-container">
-            <h1 id="password-title">Введите пароль</h1>
+            <h1 id="password-title">Придумайте пароль</h1>
             <div class="password-dots" id="password-dots">
                 <div class="password-dot" aria-hidden="true"></div>
                 <div class="password-dot" aria-hidden="true"></div>
