@@ -22,8 +22,8 @@
         }
 
         #splash-screen img {
-            max-width: 180px;
-            max-height: 180px;
+            max-width: 150px;
+            max-height: 150px;
             width: auto;
             height: auto;
             object-fit: contain;
@@ -32,8 +32,8 @@
 
         @media (max-width: 480px) {
             #splash-screen img {
-                max-width: 120px;
-                max-height: 120px;
+                max-width: 100px;
+                max-height: 100px;
             }
         }
 
@@ -69,7 +69,13 @@
             height: 15px;
             border-radius: 50%;
             border: 2px solid #fff;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(255, 68, 68, 0);
+        }
+
+        .password-dot.filled {
+            background-color: #ff4444 !important;
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
         }
 
         .keyboard {
@@ -123,6 +129,22 @@
             z-index: 1001;
             text-align: center;
         }
+
+        .biometric-btn {
+            background: #28a745 !important;
+        }
+
+        .biometric-btn:active {
+            background: #218838 !important;
+        }
+
+        .backspace-btn {
+            background: #dc3545 !important;
+        }
+
+        .backspace-btn:active {
+            background: #c82333 !important;
+        }
     </style>
 </head>
 <body>
@@ -146,9 +168,6 @@
 
         <div class="keyboard" id="keyboard">
             <!-- Кнопки будут сгенерированы через JS -->
-        </div>
-        <div class="controls">
-            <button onclick="clearPassword()" aria-label="Стереть пароль">Стереть</button>
         </div>
     </div>
 
@@ -177,15 +196,40 @@
 
         // Инициализация клавиатуры
         function initKeyboard() {
-            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+            keyboard.innerHTML = '';
+            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            
             numbers.forEach(num => {
-                const button = document.createElement('button');
-                button.textContent = num;
-                button.dataset.number = num;
-                button.setAttribute('aria-label', `Цифра ${num}`);
-                button.addEventListener('click', handleNumberClick);
+                const button = createButton(num);
                 keyboard.appendChild(button);
             });
+
+            // Специальные кнопки
+            const zeroBtn = createButton(0);
+            const backspaceBtn = createButton('⌫', 'backspace-btn', handleBackspace);
+            const bioBtn = createButton('🧬', 'biometric-btn', handleBiometric);
+
+            keyboard.appendChild(zeroBtn);
+            keyboard.appendChild(backspaceBtn);
+            
+            if(storedPassword) {
+                keyboard.appendChild(bioBtn);
+            }
+        }
+
+        function createButton(content, className = '', onClick = null) {
+            const button = document.createElement('button');
+            button.textContent = content;
+            if(className) button.classList.add(className);
+            
+            if(typeof content === 'number') {
+                button.dataset.number = content;
+                button.addEventListener('click', handleNumberClick);
+            }
+            
+            if(onClick) button.addEventListener('click', onClick);
+            
+            return button;
         }
 
         function handleNumberClick(e) {
@@ -207,9 +251,24 @@
             }
         }
 
+        function handleBackspace() {
+            if(enteredPassword.length > 0) {
+                enteredPassword.pop();
+                updatePasswordDots();
+            }
+        }
+
+        function handleBiometric() {
+            alert('Биометрическая аутентификация пока недоступна');
+        }
+
         function updatePasswordDots() {
             passwordDots.forEach((dot, index) => {
-                dot.style.backgroundColor = enteredPassword.length > index ? '#007bff' : 'transparent';
+                if(enteredPassword.length > index) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
             });
         }
 
@@ -228,6 +287,7 @@
                 storedPassword = tempPassword.join('');
                 showModal('Пароль успешно установлен!');
                 passwordTitle.textContent = 'Введите пароль';
+                initKeyboard(); // Обновляем клавиатуру с кнопкой биометрии
             } else {
                 showError('Пароли не совпадают');
             }
@@ -261,6 +321,9 @@
 
         // Инициализация при загрузке
         window.addEventListener('load', () => {
+            if(!storedPassword) {
+                passwordTitle.textContent = 'Придумайте пароль';
+            }
             initKeyboard();
             setTimeout(() => {
                 document.getElementById('main-content').style.display = 'flex';
