@@ -18,12 +18,13 @@
             align-items: center;
             z-index: 1000;
             animation: fadeOut 3s forwards;
+            -webkit-animation: fadeOut 3s forwards;
         }
 
         @keyframes fadeOut {
             0% { opacity: 1; }
             90% { opacity: 1; }
-            100% { opacity: 0; display: none; }
+            100% { opacity: 0; visibility: hidden; }
         }
 
         /* Основной контент */
@@ -32,6 +33,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
+            padding: 20px;
         }
 
         .password-container {
@@ -57,13 +59,14 @@
         .keyboard {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 15px;
             max-width: 300px;
+            width: 100%;
         }
 
         .keyboard button {
-            width: 70px;
-            height: 70px;
+            width: 100%;
+            aspect-ratio: 1;
             border-radius: 50%;
             border: none;
             background: #222;
@@ -78,9 +81,10 @@
         }
 
         .error-message {
-            color: red;
+            color: #ff4444;
             margin-top: 15px;
             display: none;
+            font-size: 0.9em;
         }
 
         .controls {
@@ -89,63 +93,103 @@
             gap: 10px;
             justify-content: center;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 1001;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <!-- Заставка -->
     <div id="splash-screen">
-        <img src="A.png" alt="Логотип">
+        <img src="A.png" alt="Логотип компании" aria-hidden="true">
     </div>
 
     <!-- Основной контент -->
     <div id="main-content">
         <div class="password-container">
-            <h3>Введите пароль</h3>
+            <h1 id="password-title">Введите пароль</h1>
             <div class="password-dots" id="password-dots">
-                <div class="password-dot"></div>
-                <div class="password-dot"></div>
-                <div class="password-dot"></div>
-                <div class="password-dot"></div>
+                <div class="password-dot" aria-hidden="true"></div>
+                <div class="password-dot" aria-hidden="true"></div>
+                <div class="password-dot" aria-hidden="true"></div>
+                <div class="password-dot" aria-hidden="true"></div>
             </div>
-            <div class="error-message" id="error-message">Неверный пароль</div>
+            <div class="error-message" id="error-message" role="alert"></div>
         </div>
 
-        <div class="keyboard">
-            <button data-number="1">1</button>
-            <button data-number="2">2</button>
-            <button data-number="3">3</button>
-            <button data-number="4">4</button>
-            <button data-number="5">5</button>
-            <button data-number="6">6</button>
-            <button data-number="7">7</button>
-            <button data-number="8">8</button>
-            <button data-number="9">9</button>
-            <button data-number="0">0</button>
+        <div class="keyboard" id="keyboard">
+            <!-- Кнопки будут сгенерированы через JS -->
         </div>
         <div class="controls">
-            <button onclick="clearPassword()">Стереть</button>
+            <button onclick="clearPassword()" aria-label="Стереть пароль">Стереть</button>
         </div>
+    </div>
+
+    <!-- Модальное окно -->
+    <div id="confirm-modal" class="modal">
+        <p>Подтвердите пароль</p>
+        <div class="password-dots">
+            <div class="password-dot"></div>
+            <div class="password-dot"></div>
+            <div class="password-dot"></div>
+            <div class="password-dot"></div>
+        </div>
+        <button onclick="confirmPassword()">Подтвердить</button>
+        <button onclick="cancelPassword()">Отмена</button>
     </div>
 
     <script>
         let enteredPassword = [];
+        let tempPassword = [];
         let storedPassword = localStorage.getItem('userPassword');
         const passwordDots = document.querySelectorAll('.password-dot');
         const errorMessage = document.getElementById('error-message');
+        const keyboard = document.getElementById('keyboard');
+        const passwordTitle = document.getElementById('password-title');
+        const confirmModal = document.getElementById('confirm-modal');
 
-        document.querySelectorAll('.keyboard button').forEach(button => {
-            button.addEventListener('click', () => {
-                if (enteredPassword.length < 4) {
-                    const number = button.dataset.number;
-                    enteredPassword.push(number);
-                    updatePasswordDots();
-                    
-                    if (enteredPassword.length === 4) {
+        // Инициализация клавиатуры
+        function initKeyboard() {
+            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+            numbers.forEach(num => {
+                const button = document.createElement('button');
+                button.textContent = num;
+                button.dataset.number = num;
+                button.setAttribute('aria-label', `Цифра ${num}`);
+                button.addEventListener('click', handleNumberClick);
+                keyboard.appendChild(button);
+            });
+        }
+
+        function handleNumberClick(e) {
+            if (enteredPassword.length < 4) {
+                const number = e.target.dataset.number;
+                enteredPassword.push(number);
+                updatePasswordDots();
+                
+                if (enteredPassword.length === 4) {
+                    if (!storedPassword) {
+                        tempPassword = [...enteredPassword];
+                        passwordTitle.textContent = 'Подтвердите пароль';
+                        confirmModal.style.display = 'block';
+                        clearPassword();
+                    } else {
                         checkPassword();
                     }
                 }
-            });
-        });
+            }
+        }
 
         function updatePasswordDots() {
             passwordDots.forEach((dot, index) => {
@@ -154,24 +198,36 @@
         }
 
         function checkPassword() {
-            if (!storedPassword) {
-                // Первая установка пароля
-                localStorage.setItem('userPassword', enteredPassword.join(''));
-                alert('Пароль успешно установлен!');
-                storedPassword = enteredPassword.join('');
-                resetPassword();
+            if (enteredPassword.join('') === storedPassword) {
+                window.location.href = 'main.html';
             } else {
-                // Проверка пароля
-                if (enteredPassword.join('') === storedPassword) {
-                    window.location.href = 'main.html'; // Переход на основную страницу
-                } else {
-                    errorMessage.style.display = 'block';
-                    setTimeout(() => {
-                        errorMessage.style.display = 'none';
-                    }, 1000);
-                    resetPassword();
-                }
+                showError('Неверный пароль');
+                clearPassword();
             }
+        }
+
+        function confirmPassword() {
+            if (enteredPassword.join('') === tempPassword.join('')) {
+                localStorage.setItem('userPassword', tempPassword.join(''));
+                storedPassword = tempPassword.join('');
+                showModal('Пароль успешно установлен!');
+                passwordTitle.textContent = 'Введите пароль';
+            } else {
+                showError('Пароли не совпадают');
+            }
+            cancelPassword();
+        }
+
+        function cancelPassword() {
+            confirmModal.style.display = 'none';
+            clearPassword();
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            if (navigator.vibrate) navigator.vibrate(200);
+            setTimeout(() => errorMessage.style.display = 'none', 1500);
         }
 
         function clearPassword() {
@@ -179,18 +235,21 @@
             updatePasswordDots();
         }
 
-        function resetPassword() {
-            enteredPassword = [];
-            updatePasswordDots();
+        function showModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.textContent = message;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.remove(), 2000);
         }
 
-        // Показываем основной интерфейс после заставки
-        setTimeout(() => {
-            document.getElementById('main-content').style.display = 'flex';
-            if (!storedPassword) {
-                document.querySelector('h3').textContent = 'Придумайте пароль';
-            }
-        }, 3000);
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            initKeyboard();
+            setTimeout(() => {
+                document.getElementById('main-content').style.display = 'flex';
+            }, 3000);
+        });
     </script>
 </body>
 </html>
