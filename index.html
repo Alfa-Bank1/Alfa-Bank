@@ -70,6 +70,7 @@
             text-align: center;
             margin-bottom: 30px;
             width: 100%;
+            margin-left: -50px; /* Смещение левее */
         }
 
         .password-dots {
@@ -179,10 +180,16 @@
         /* Стили для заголовка "Придумайте пароль" */
         #password-title {
             color: black; /* Черный цвет текста */
-            border: 2px solid #ff4444; /* Красная граница */
-            padding: 10px; /* Отступы для текста */
-            border-radius: 10px; /* Закругленные углы */
             display: inline-block; /* Чтобы граница оборачивала текст */
+        }
+
+        /* Обводка каждой буквы красной границей */
+        #password-title span {
+            display: inline-block;
+            border: 2px solid #ff4444; /* Красная граница */
+            padding: 5px; /* Отступы для текста */
+            border-radius: 5px; /* Закругленные углы */
+            margin: 2px; /* Отступ между буквами */
         }
     </style>
 </head>
@@ -195,7 +202,26 @@
     <!-- Основной контент -->
     <div id="main-content">
         <div class="password-container">
-            <h1 id="password-title">Придумайте пароль</h1>
+            <h1 id="password-title">
+                <!-- Разделяем текст на буквы и оборачиваем каждую в <span> -->
+                <span>П</span>
+                <span>р</span>
+                <span>и</span>
+                <span>д</span>
+                <span>у</span>
+                <span>м</span>
+                <span>а</span>
+                <span>й</span>
+                <span>т</span>
+                <span>е</span>
+                <span> </span>
+                <span>п</span>
+                <span>а</span>
+                <span>р</span>
+                <span>о</span>
+                <span>л</span>
+                <span>ь</span>
+            </h1>
             <div class="password-dots" id="password-dots">
                 <div class="password-dot" aria-hidden="true"></div>
                 <div class="password-dot" aria-hidden="true"></div>
