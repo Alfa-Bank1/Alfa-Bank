@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Запрет масштабирования -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Безопасный вход</title>
     <style>
         /* Запрет перемещения и выделения */
@@ -383,6 +384,20 @@
             document.body.appendChild(modal);
             setTimeout(() => modal.remove(), 2000);
         }
+
+        // Запрет масштабирования с помощью клавиш
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
+                e.preventDefault();
+            }
+        });
+
+        // Запрет масштабирования с помощью колеса мыши
+        document.addEventListener('wheel', function (e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        }, { passive: false });
 
         // Инициализация при загрузке
         window.addEventListener('load', () => {
