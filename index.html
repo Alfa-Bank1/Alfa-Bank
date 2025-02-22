@@ -69,5 +69,13 @@
     <div id="main-content">
         <h1>Привет!</h1>
     </div>
+
+    <script>
+        // Добавляем класс .fade-out к заставке после завершения анимации
+        const splashScreen = document.getElementById('splash-screen');
+        setTimeout(() => {
+            splashScreen.classList.add('fade-out');
+        }, 3000); // 3000 миллисекунд = 3 секунды
+    </script>
 </body>
 </html>
