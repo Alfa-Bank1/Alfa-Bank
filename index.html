@@ -12,11 +12,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #ffffff;
+            background-color: #000000; /* Черный фон */
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            animation: fadeOut 3s forwards; /* Анимация исчезновения */
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            90% { opacity: 1; } /* Логотип остается видимым 90% времени */
+            100% { opacity: 0; display: none; } /* Исчезает и скрывается */
         }
 
         #splash-screen img {
@@ -27,8 +34,8 @@
         /* Стили для основного содержимого */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            background-color: #000000; /* Черный фон */
+            color: #ffffff; /* Белый текст для контраста */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -38,12 +45,17 @@
 
         h1 {
             font-size: 36px;
-            color: #007bff;
+            color: #007bff; /* Синий цвет текста */
         }
 
         /* Скрываем основное содержимое, пока заставка активна */
-        .hidden {
-            display: none;
+        #main-content {
+            display: none; /* Сначала скрыто */
+        }
+
+        /* Показываем основное содержимое после завершения анимации */
+        #splash-screen.fade-out + #main-content {
+            display: flex;
         }
     </style>
 </head>
@@ -54,16 +66,8 @@
     </div>
 
     <!-- Основное содержимое -->
-    <div id="main-content" class="hidden">
+    <div id="main-content">
         <h1>Привет!</h1>
     </div>
-
-    <script>
-        // Скрываем заставку через 3 секунды и показываем основное содержимое
-        setTimeout(function() {
-            document.getElementById('splash-screen').style.display = 'none';
-            document.getElementById('main-content').classList.remove('hidden');
-        }, 3000); // 3000 миллисекунд = 3 секунды
-    </script>
 </body>
 </html>
