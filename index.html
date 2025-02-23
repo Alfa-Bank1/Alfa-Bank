@@ -139,22 +139,12 @@
             font-size: 0.9em;
         }
 
-        /* Стили для заголовка "Придумайте пароль" */
+        /* Стили для заголовка "Введите пароль" */
         #password-title {
             color: white;
-            display: inline-block;
             margin-bottom: 20px; /* Отступ снизу */
-            height: 60px; /* Фиксированная высота */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Убраны границы букв */
-        #password-title span {
-            display: inline-block;
-            padding: 5px;
-            margin: 2px;
+            font-size: 1.5em;
+            text-align: center;
         }
 
         /* Расположение кнопок */
@@ -178,26 +168,7 @@
     <!-- Основной контент -->
     <div id="main-content">
         <div class="password-container">
-            <h1 id="password-title">
-                <!-- Разделяем текст на буквы и оборачиваем каждую в <span> -->
-                <span>П</span>
-                <span>р</span>
-                <span>и</span>
-                <span>д</span>
-                <span>у</span>
-                <span>м</span>
-                <span>а</span>
-                <span>й</span>
-                <span>т</span>
-                <span>е</span>
-                <span> </span>
-                <span>п</span>
-                <span>а</span>
-                <span>р</span>
-                <span>о</span>
-                <span>л</span>
-                <span>ь</span>
-            </h1>
+            <h1 id="password-title">Введите пароль</h1>
             <div class="password-dots" id="password-dots">
                 <div class="password-dot" aria-hidden="true"></div>
                 <div class="password-dot" aria-hidden="true"></div>
@@ -370,7 +341,9 @@
 
         // Инициализация при загрузке
         window.addEventListener('load', () => {
-            if (!storedPassword) {
+            if (storedPassword) {
+                passwordTitle.textContent = 'Введите пароль';
+            } else {
                 passwordTitle.textContent = 'Придумайте пароль';
             }
             initKeyboard();
