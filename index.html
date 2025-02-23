@@ -1,415 +1,192 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <!-- Запрет масштабирования -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Безопасный вход</title>
-    <style>
-        /* Запрет перемещения и выделения */
-        body {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background-color: #000; /* Черный фон для контраста */
-        }
+<style>
+    /* Запрет перемещения и выделения */
+    body {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: #000; /* Черный фон для контраста */
+    }
 
-        /* Стили для заставки */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            animation: fadeOut 3s forwards;
-            -webkit-animation: fadeOut 3s forwards;
-        }
+    /* Стили для заставки */
+    #splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeOut 3s forwards;
+        -webkit-animation: fadeOut 3s forwards;
+    }
 
+    #splash-screen img {
+        max-width: 150px;
+        max-height: 150px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        image-rendering: crisp-edges;
+    }
+
+    @media (max-width: 480px) {
         #splash-screen img {
-            max-width: 150px;
-            max-height: 150px;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            image-rendering: crisp-edges;
+            max-width: 100px;
+            max-height: 100px;
         }
+    }
 
-        @media (max-width: 480px) {
-            #splash-screen img {
-                max-width: 100px;
-                max-height: 100px;
-            }
-        }
+    @keyframes fadeOut {
+        0% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { opacity: 0; visibility: hidden; }
+    }
 
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
-        }
+    /* Основной контент */
+    #main-content {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Центрируем по вертикали */
+        width: 100%;
+        height: 100vh; /* Занимаем всю высоту экрана */
+        padding: 20px;
+        box-sizing: border-box; /* Учитываем padding в ширине и высоте */
+    }
 
-        /* Основной контент */
-        #main-content {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            padding: 20px;
-        }
+    .password-container {
+        text-align: center;
+        margin-bottom: 30px;
+        width: 100%;
+    }
 
-        .password-container {
-            text-align: center;
-            margin-bottom: 30px;
-            width: 100%;
-        }
+    .password-dots {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        justify-content: center; /* Выравниваем точки по центру */
+        width: 100%;
+    }
 
-        .password-dots {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            justify-content: center; /* Выравниваем точки по центру */
-            width: 100%;
-        }
+    .password-dot {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 5px rgba(255, 68, 68, 0);
+    }
 
-        .password-dot {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 5px rgba(255, 68, 68, 0);
-        }
+    .password-dot.filled {
+        background-color: #ff4444 !important;
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+    }
 
-        .password-dot.filled {
-            background-color: #ff4444 !important;
-            box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
-        }
+    .keyboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        gap: 15px;
+        max-width: 300px;
+        width: 100%;
+        margin: 0 auto; /* Центрируем по горизонтали */
+    }
 
-        .keyboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 15px;
-            max-width: 300px;
-            width: 100%;
-            transform: translateX(-20px);
-        }
+    .keyboard button {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: none;
+        background: #222;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        transition: background 0.3s;
+        outline: none; /* Убираем стандартное выделение */
+        -webkit-tap-highlight-color: transparent; /* Убираем подсветку на мобильных устройствах */
+    }
 
-        .keyboard button {
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 50%;
-            border: none;
-            background: #222;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            transition: background 0.3s;
-            outline: none; /* Убираем стандартное выделение */
-            -webkit-tap-highlight-color: transparent; /* Убираем подсветку на мобильных устройствах */
-        }
+    .keyboard button:active {
+        background: #ff4444; /* Красный цвет при нажатии */
+    }
 
-        .keyboard button:active {
-            background: #ff4444; /* Красный цвет при нажатии */
-        }
+    .error-message {
+        color: #ff4444;
+        margin-top: 15px;
+        display: none;
+        font-size: 0.9em;
+    }
 
-        .error-message {
-            color: #ff4444;
-            margin-top: 15px;
-            display: none;
-            font-size: 0.9em;
-        }
+    .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
 
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        z-index: 1001;
+        text-align: center;
+    }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            z-index: 1001;
-            text-align: center;
-        }
+    .biometric-btn {
+        background: #28a745 !important;
+    }
 
-        .biometric-btn {
-            background: #28a745 !important;
-        }
+    .biometric-btn:active {
+        background: #218838 !important;
+    }
 
-        .biometric-btn:active {
-            background: #218838 !important;
-        }
+    .backspace-btn {
+        background: #dc3545 !important;
+    }
 
-        .backspace-btn {
-            background: #dc3545 !important;
-        }
+    .backspace-btn:active {
+        background: #c82333 !important;
+    }
 
-        .backspace-btn:active {
-            background: #c82333 !important;
-        }
+    /* Расположение кнопок */
+    .keyboard button[data-number="0"] {
+        grid-row: 4 / 5;
+        grid-column: 2 / 3;
+    }
 
-        /* Расположение кнопок */
-        .keyboard button[data-number="0"] {
-            grid-row: 4 / 5;
-            grid-column: 2 / 3;
-        }
+    .keyboard button.backspace-btn {
+        grid-row: 4 / 5;
+        grid-column: 3 / 4;
+    }
 
-        .keyboard button.backspace-btn {
-            grid-row: 4 / 5;
-            grid-column: 3 / 4;
-        }
+    /* Стили для заголовка "Придумайте пароль" */
+    #password-title {
+        color: white; /* Белый цвет текста */
+        display: inline-block; /* Чтобы граница оборачивала текст */
+    }
 
-        /* Стили для заголовка "Придумайте пароль" */
-        #password-title {
-            color: white; /* Белый цвет текста */
-            display: inline-block; /* Чтобы граница оборачивала текст */
-        }
-
-        /* Обводка каждой буквы красной границей */
-        #password-title span {
-            display: inline-block;
-            border: 2px solid #ff4444; /* Красная граница */
-            padding: 5px; /* Отступы для текста */
-            border-radius: 5px; /* Закругленные углы */
-            margin: 2px; /* Отступ между буквами */
-        }
-    </style>
-</head>
-<body>
-    <!-- Заставка -->
-    <div id="splash-screen">
-        <img src="A.png" alt="Логотип компании" aria-hidden="true">
-    </div>
-
-    <!-- Основной контент -->
-    <div id="main-content">
-        <div class="password-container">
-            <h1 id="password-title">
-                <!-- Разделяем текст на буквы и оборачиваем каждую в <span> -->
-                <span>П</span>
-                <span>р</span>
-                <span>и</span>
-                <span>д</span>
-                <span>у</span>
-                <span>м</span>
-                <span>а</span>
-                <span>й</span>
-                <span>т</span>
-                <span>е</span>
-                <span> </span>
-                <span>п</span>
-                <span>а</span>
-                <span>р</span>
-                <span>о</span>
-                <span>л</span>
-                <span>ь</span>
-            </h1>
-            <div class="password-dots" id="password-dots">
-                <div class="password-dot" aria-hidden="true"></div>
-                <div class="password-dot" aria-hidden="true"></div>
-                <div class="password-dot" aria-hidden="true"></div>
-                <div class="password-dot" aria-hidden="true"></div>
-            </div>
-            <div class="error-message" id="error-message" role="alert"></div>
-        </div>
-
-        <div class="keyboard" id="keyboard">
-            <!-- Кнопки будут сгенерированы через JS -->
-        </div>
-    </div>
-
-    <!-- Модальное окно -->
-    <div id="confirm-modal" class="modal">
-        <p>Подтвердите пароль</p>
-        <div class="password-dots">
-            <div class="password-dot"></div>
-            <div class="password-dot"></div>
-            <div class="password-dot"></div>
-            <div class="password-dot"></div>
-        </div>
-        <button onclick="confirmPassword()">Подтвердить</button>
-        <button onclick="cancelPassword()">Отмена</button>
-    </div>
-
-    <script>
-        let enteredPassword = [];
-        let tempPassword = [];
-        let storedPassword = localStorage.getItem('userPassword');
-        const passwordDots = document.querySelectorAll('.password-dot');
-        const errorMessage = document.getElementById('error-message');
-        const keyboard = document.getElementById('keyboard');
-        const passwordTitle = document.getElementById('password-title');
-        const confirmModal = document.getElementById('confirm-modal');
-
-        // Инициализация клавиатуры
-        function initKeyboard() {
-            keyboard.innerHTML = '';
-            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-            
-            numbers.forEach(num => {
-                const button = createButton(num);
-                keyboard.appendChild(button);
-            });
-
-            // Специальные кнопки
-            const zeroBtn = createButton(0);
-            const backspaceBtn = createButton('⌫', 'backspace-btn', handleBackspace);
-            const bioBtn = createButton('🧬', 'biometric-btn', handleBiometric);
-
-            keyboard.appendChild(zeroBtn);
-            keyboard.appendChild(backspaceBtn);
-            
-            if(storedPassword) {
-                keyboard.appendChild(bioBtn);
-            }
-        }
-
-        function createButton(content, className = '', onClick = null) {
-            const button = document.createElement('button');
-            button.textContent = content;
-            if(className) button.classList.add(className);
-            
-            if(typeof content === 'number') {
-                button.dataset.number = content;
-                button.addEventListener('click', handleNumberClick);
-            }
-            
-            if(onClick) button.addEventListener('click', onClick);
-            
-            return button;
-        }
-
-        function handleNumberClick(e) {
-            if (enteredPassword.length < 4) {
-                const number = e.target.dataset.number;
-                enteredPassword.push(number);
-                updatePasswordDots();
-                
-                if (enteredPassword.length === 4) {
-                    if (!storedPassword) {
-                        tempPassword = [...enteredPassword];
-                        passwordTitle.textContent = 'Подтвердите пароль';
-                        confirmModal.style.display = 'block';
-                        clearPassword();
-                    } else {
-                        checkPassword();
-                    }
-                }
-            }
-        }
-
-        function handleBackspace() {
-            if(enteredPassword.length > 0) {
-                enteredPassword.pop();
-                updatePasswordDots();
-            }
-        }
-
-        function handleBiometric() {
-            alert('Биометрическая аутентификация пока недоступна');
-        }
-
-        function updatePasswordDots() {
-            passwordDots.forEach((dot, index) => {
-                if(enteredPassword.length > index) {
-                    dot.classList.add('filled');
-                } else {
-                    dot.classList.remove('filled');
-                }
-            });
-        }
-
-        function checkPassword() {
-            if (enteredPassword.join('') === storedPassword) {
-                window.location.href = 'main.html';
-            } else {
-                showError('Неверный пароль');
-                clearPassword();
-            }
-        }
-
-        function confirmPassword() {
-            if (enteredPassword.join('') === tempPassword.join('')) {
-                localStorage.setItem('userPassword', tempPassword.join(''));
-                storedPassword = tempPassword.join('');
-                showModal('Пароль успешно установлен!');
-                passwordTitle.textContent = 'Введите пароль';
-                initKeyboard(); // Обновляем клавиатуру с кнопкой биометрии
-            } else {
-                showError('Пароли не совпадают');
-            }
-            cancelPassword();
-        }
-
-        function cancelPassword() {
-            confirmModal.style.display = 'none';
-            clearPassword();
-        }
-
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-            if (navigator.vibrate) navigator.vibrate(200);
-            setTimeout(() => errorMessage.style.display = 'none', 1500);
-        }
-
-        function clearPassword() {
-            enteredPassword = [];
-            updatePasswordDots();
-        }
-
-        function showModal(message) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.textContent = message;
-            document.body.appendChild(modal);
-            setTimeout(() => modal.remove(), 2000);
-        }
-
-        // Запрет масштабирования с помощью клавиш
-        document.addEventListener('keydown', function (e) {
-            if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
-                e.preventDefault();
-            }
-        });
-
-        // Запрет масштабирования с помощью колеса мыши
-        document.addEventListener('wheel', function (e) {
-            if (e.ctrlKey) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Инициализация при загрузке
-        window.addEventListener('load', () => {
-            if(!storedPassword) {
-                passwordTitle.textContent = 'Придумайте пароль';
-            }
-            initKeyboard();
-            setTimeout(() => {
-                document.getElementById('main-content').style.display = 'flex';
-            }, 3000);
-        });
-    </script>
-</body>
-</html>
+    /* Обводка каждой буквы красной границей */
+    #password-title span {
+        display: inline-block;
+        border: 2px solid #ff4444; /* Красная граница */
+        padding: 5px; /* Отступы для текста */
+        border-radius: 5px; /* Закругленные углы */
+        margin: 2px; /* Отступ между буквами */
+    }
+</style>
