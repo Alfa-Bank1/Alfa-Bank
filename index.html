@@ -269,7 +269,165 @@
     </div>
 
     <script>
-        // JavaScript код...
+        let enteredPassword = [];
+        let tempPassword = [];
+        let storedPassword = localStorage.getItem('userPassword');
+        const passwordDots = document.querySelectorAll('.password-dot');
+        const errorMessage = document.getElementById('error-message');
+        const keyboard = document.getElementById('keyboard');
+        const passwordTitle = document.getElementById('password-title');
+        const confirmModal = document.getElementById('confirm-modal');
+
+        // Инициализация клавиатуры
+        function initKeyboard() {
+            keyboard.innerHTML = '';
+            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            
+            numbers.forEach(num => {
+                const button = createButton(num);
+                keyboard.appendChild(button);
+            });
+
+            // Специальные кнопки
+            const zeroBtn = createButton(0);
+            const backspaceBtn = createButton('⌫', 'backspace-btn', handleBackspace);
+            const bioBtn = createButton('🧬', 'biometric-btn', handleBiometric);
+
+            keyboard.appendChild(zeroBtn);
+            keyboard.appendChild(backspaceBtn);
+            
+            if (storedPassword) {
+                keyboard.appendChild(bioBtn);
+            }
+        }
+
+        function createButton(content, className = '', onClick = null) {
+            const button = document.createElement('button');
+            button.textContent = content;
+            if (className) button.classList.add(className);
+            
+            if (typeof content === 'number') {
+                button.dataset.number = content;
+                button.addEventListener('click', handleNumberClick);
+            }
+            
+            if (onClick) button.addEventListener('click', onClick);
+            
+            return button;
+        }
+
+        function handleNumberClick(e) {
+            if (enteredPassword.length < 4) {
+                const number = e.target.dataset.number;
+                enteredPassword.push(number);
+                updatePasswordDots();
+                
+                if (enteredPassword.length === 4) {
+                    if (!storedPassword) {
+                        tempPassword = [...enteredPassword];
+                        passwordTitle.textContent = 'Подтвердите пароль';
+                        confirmModal.style.display = 'block';
+                        clearPassword();
+                    } else {
+                        checkPassword();
+                    }
+                }
+            }
+        }
+
+        function handleBackspace() {
+            if (enteredPassword.length > 0) {
+                enteredPassword.pop();
+                updatePasswordDots();
+            }
+        }
+
+        function handleBiometric() {
+            alert('Биометрическая аутентификация пока недоступна');
+        }
+
+        function updatePasswordDots() {
+            passwordDots.forEach((dot, index) => {
+                if (enteredPassword.length > index) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            });
+        }
+
+        function checkPassword() {
+            if (enteredPassword.join('') === storedPassword) {
+                window.location.href = 'main.html';
+            } else {
+                showError('Неверный пароль');
+                clearPassword();
+            }
+        }
+
+        function confirmPassword() {
+            if (enteredPassword.join('') === tempPassword.join('')) {
+                localStorage.setItem('userPassword', tempPassword.join(''));
+                storedPassword = tempPassword.join('');
+                showModal('Пароль успешно установлен!');
+                passwordTitle.textContent = 'Введите пароль';
+                initKeyboard(); // Обновляем клавиатуру с кнопкой биометрии
+            } else {
+                showError('Пароли не совпадают');
+            }
+            cancelPassword();
+        }
+
+        function cancelPassword() {
+            confirmModal.style.display = 'none';
+            clearPassword();
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            if (navigator.vibrate) navigator.vibrate(200);
+            setTimeout(() => errorMessage.style.display = 'none', 1500);
+        }
+
+        function clearPassword() {
+            enteredPassword = [];
+            updatePasswordDots();
+        }
+
+        function showModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.textContent = message;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.remove(), 2000);
+        }
+
+        // Запрет масштабирования с помощью клавиш
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
+                e.preventDefault();
+            }
+        });
+
+        // Запрет масштабирования с помощью колеса мыши
+        document.addEventListener('wheel', function (e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            if (!storedPassword) {
+                passwordTitle.textContent = 'Придумайте пароль';
+            }
+            initKeyboard();
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none'; // Скрыть заставку
+                document.getElementById('main-content').style.display = 'flex'; // Показать основной контент
+            }, 3000); // 3 секунды
+        });
     </script>
 </body>
 </html>
