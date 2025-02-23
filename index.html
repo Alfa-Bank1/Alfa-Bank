@@ -158,6 +158,17 @@
             border-radius: 5px;
             margin: 2px;
         }
+
+        /* Расположение кнопок */
+        .keyboard button[data-number="0"] {
+            grid-row: 4 / 5;
+            grid-column: 2 / 3; /* Кнопка 0 под кнопкой 8 */
+        }
+
+        .keyboard button.backspace-btn {
+            grid-row: 4 / 5;
+            grid-column: 3 / 4; /* Кнопка "стереть" под кнопкой 9 */
+        }
     </style>
 </head>
 <body>
