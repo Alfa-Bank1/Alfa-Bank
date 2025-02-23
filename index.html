@@ -139,47 +139,6 @@
             font-size: 0.9em;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            z-index: 1001;
-            text-align: center;
-        }
-
-        .biometric-btn {
-            background: #28a745 !important;
-        }
-
-        .biometric-btn:active {
-            background: #218838 !important;
-        }
-
-        .backspace-btn {
-            background: #CC0000 !important;
-        }
-
-        .backspace-btn:active {
-            background: #a50010 !important;
-        }
-
-        /* Расположение кнопок */
-        .keyboard button[data-number="0"] {
-            grid-row: 4 / 5;
-            grid-column: 2 / 3;
-        }
-
-        .keyboard button.backspace-btn {
-            grid-row: 4 / 5;
-            grid-column: 3 / 4;
-        }
-
         /* Стили для заголовка "Придумайте пароль" */
         #password-title {
             color: white;
@@ -240,19 +199,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно -->
-    <div id="confirm-modal" class="modal">
-        <p>Подтвердите пароль</p>
-        <div class="password-dots">
-            <div class="password-dot"></div>
-            <div class="password-dot"></div>
-            <div class="password-dot"></div>
-            <div class="password-dot"></div>
-        </div>
-        <button onclick="confirmPassword()">Подтвердить</button>
-        <button onclick="cancelPassword()">Отмена</button>
-    </div>
-
     <script>
         let enteredPassword = [];
         let tempPassword = [];
@@ -261,7 +207,6 @@
         const errorMessage = document.getElementById('error-message');
         const keyboard = document.getElementById('keyboard');
         const passwordTitle = document.getElementById('password-title');
-        const confirmModal = document.getElementById('confirm-modal');
 
         // Инициализация клавиатуры
         function initKeyboard() {
@@ -309,10 +254,32 @@
                 
                 if (enteredPassword.length === 4) {
                     if (!storedPassword) {
-                        tempPassword = [...enteredPassword];
-                        passwordTitle.textContent = 'Подтвердите пароль';
-                        confirmModal.style.display = 'block';
-                        clearPassword();
+                        if (tempPassword.length === 0) {
+                            // Первый ввод пароля
+                            tempPassword = [...enteredPassword];
+                            passwordTitle.textContent = 'Подтвердите пароль';
+                            clearPassword();
+                        } else {
+                            // Подтверждение пароля
+                            if (enteredPassword.join('') === tempPassword.join('')) {
+                                localStorage.setItem('userPassword', tempPassword.join(''));
+                                storedPassword = tempPassword.join('');
+                                showModal('Пароль успешно установлен!');
+                                passwordTitle.textContent = 'Введите пароль';
+                                initKeyboard(); // Обновляем клавиатуру с кнопкой биометрии
+
+                                // Устанавливаем фоновое изображение после подтверждения пароля
+                                document.body.style.backgroundImage = "url('background.jpg')";
+                                document.body.style.backgroundSize = "cover";
+                                document.body.style.backgroundPosition = "center";
+                                document.body.style.backgroundRepeat = "no-repeat";
+                            } else {
+                                showError('Пароли не совпадают');
+                                clearPassword();
+                                tempPassword = []; // Сбрасываем временный пароль
+                                passwordTitle.textContent = 'Придумайте пароль';
+                            }
+                        }
                     } else {
                         checkPassword();
                     }
@@ -343,35 +310,15 @@
 
         function checkPassword() {
             if (enteredPassword.join('') === storedPassword) {
-                window.location.href = 'main.html';
-            } else {
-                showError('Неверный пароль');
-                clearPassword();
-            }
-        }
-
-        function confirmPassword() {
-            if (enteredPassword.join('') === tempPassword.join('')) {
-                localStorage.setItem('userPassword', tempPassword.join(''));
-                storedPassword = tempPassword.join('');
-                showModal('Пароль успешно установлен!');
-                passwordTitle.textContent = 'Введите пароль';
-                initKeyboard(); // Обновляем клавиатуру с кнопкой биометрии
-
-                // Устанавливаем фоновое изображение после подтверждения пароля
+                // Устанавливаем фоновое изображение после успешного ввода пароля
                 document.body.style.backgroundImage = "url('background.jpg')";
                 document.body.style.backgroundSize = "cover";
                 document.body.style.backgroundPosition = "center";
                 document.body.style.backgroundRepeat = "no-repeat";
             } else {
-                showError('Пароли не совпадают');
+                showError('Неверный пароль');
+                clearPassword();
             }
-            cancelPassword();
-        }
-
-        function cancelPassword() {
-            confirmModal.style.display = 'none';
-            clearPassword();
         }
 
         function showError(message) {
