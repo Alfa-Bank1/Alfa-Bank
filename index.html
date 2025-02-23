@@ -124,13 +124,15 @@
             color: white;
             font-size: 24px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.1s, box-shadow 0.1s, transform 0.1s; /* Плавные переходы */
             outline: none;
             -webkit-tap-highlight-color: transparent;
         }
 
         .keyboard button:active {
-            background: #ff4444;
+            background: #ff4444; /* Красный цвет при нажатии */
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.8); /* Яркая тень */
+            transform: scale(0.95); /* Легкое уменьшение размера */
         }
 
         .error-message {
