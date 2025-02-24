@@ -2,9 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- Запрет масштабирования -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Безопасный вход</title>
+    <!-- Подключение Telegram Mini Apps API -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         /* Общие стили */
         body {
@@ -202,9 +203,17 @@
     <div id="background-image"></div>
 
     <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.ready(); // Сообщаем Telegram, что приложение готово
+
+        // Получаем данные пользователя
+        const user = tg.initDataUnsafe.user;
+        const userId = user ? user.id.toString() : null; // Telegram ID пользователя
+
         let enteredPassword = [];
         let tempPassword = [];
-        let storedPassword = localStorage.getItem('userPassword');
+        let storedPassword = userId ? localStorage.getItem(`userPassword_${userId}`) : null;
         const passwordDots = document.querySelectorAll('.password-dot');
         const errorMessage = document.getElementById('error-message');
         const keyboard = document.getElementById('keyboard');
@@ -266,7 +275,7 @@
                         } else {
                             // Подтверждение пароля
                             if (enteredPassword.join('') === tempPassword.join('')) {
-                                localStorage.setItem('userPassword', tempPassword.join(''));
+                                localStorage.setItem(`userPassword_${userId}`, tempPassword.join(''));
                                 storedPassword = tempPassword.join('');
                                 showModal('Пароль успешно установлен!');
                                 passwordTitle.textContent = 'Введите пароль';
@@ -338,22 +347,13 @@
             setTimeout(() => modal.remove(), 2000);
         }
 
-        // Запрет масштабирования с помощью клавиш
-        document.addEventListener('keydown', function (e) {
-            if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
-                e.preventDefault();
-            }
-        });
-
-        // Запрет масштабирования с помощью колеса мыши
-        document.addEventListener('wheel', function (e) {
-            if (e.ctrlKey) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
         // Инициализация при загрузке
         window.addEventListener('load', () => {
+            if (!userId) {
+                showError('Ошибка: пользователь не авторизован.');
+                return;
+            }
+
             if (storedPassword) {
                 passwordTitle.textContent = 'Введите пароль';
             } else {
