@@ -213,13 +213,15 @@
 
         let enteredPassword = [];
         let tempPassword = [];
-        let storedPassword = userId ? localStorage.getItem(`userPassword_${userId}`) : null;
         const passwordDots = document.querySelectorAll('.password-dot');
         const errorMessage = document.getElementById('error-message');
         const keyboard = document.getElementById('keyboard');
         const passwordTitle = document.getElementById('password-title');
         const mainContent = document.getElementById('main-content');
         const backgroundImage = document.getElementById('background-image');
+
+        // Проверяем, есть ли сохраненный пароль для данного пользователя
+        let storedPassword = userId ? localStorage.getItem(`userPassword_${userId}`) : null;
 
         // Инициализация клавиатуры
         function initKeyboard() {
@@ -275,6 +277,7 @@
                         } else {
                             // Подтверждение пароля
                             if (enteredPassword.join('') === tempPassword.join('')) {
+                                // Сохраняем пароль с привязкой к ID пользователя
                                 localStorage.setItem(`userPassword_${userId}`, tempPassword.join(''));
                                 storedPassword = tempPassword.join('');
                                 showModal('Пароль успешно установлен!');
