@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Регистрация</h1>
+        <p>Привет, пользователь <span id="user-id"></span>!</p>
+        <input type="password" id="password" placeholder="Придумайте пароль">
+        <input type="password" id="confirm-password" placeholder="Подтвердите пароль">
+        <button onclick="register()">Зарегистрироваться</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        // Получаем user_id из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id');
+        document.getElementById('user-id').textContent = userId;
+
+        // Функция для отправки данных на сервер
+        async function register() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            // Проверка совпадения паролей
+            if (password !== confirmPassword) {
+                document.getElementById('result').textContent = "Пароли не совпадают!";
+                document.getElementById('result').style.color = "red";
+                return;
+            }
+
+            // Отправляем данные на сервер
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId, password: password }),
+            });
+
+            const result = await response.json();
+
+            // Отображаем результат
+            if (result.success) {
+                document.getElementById('result').textContent = "Регистрация прошла успешно!";
+                document.getElementById('result').style.color = "green";
+            } else {
+                document.getElementById('result').textContent = "Ошибка: " + result.message;
+                document.getElementById('result').style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
