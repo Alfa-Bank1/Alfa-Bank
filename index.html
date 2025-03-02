@@ -20,74 +20,151 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
+            width: 300px;
         }
-        input {
-            padding: 10px;
-            margin: 10px 0;
-            width: 100%;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        .logo {
+            width: 100px;
+            height: 100px;
+            animation: fadeOut 3s forwards;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+        .password-input {
+            font-size: 24px;
+            letter-spacing: 10px;
+            margin: 20px 0;
+        }
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .keyboard button {
+            padding: 20px;
+            font-size: 18px;
             border: none;
             border-radius: 5px;
+            background-color: #007bff;
+            color: white;
             cursor: pointer;
         }
-        button:hover {
+        .keyboard button:hover {
             background-color: #0056b3;
+        }
+        .keyboard button:active {
+            background-color: #004080;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Регистрация</h1>
-        <p>Привет, пользователь <span id="user-id"></span>!</p>
-        <input type="password" id="password" placeholder="Придумайте пароль">
-        <input type="password" id="confirm-password" placeholder="Подтвердите пароль">
-        <button onclick="register()">Зарегистрироваться</button>
-        <p id="result"></p>
+        <!-- Логотип -->
+        <img src="logo.png" alt="Logo" class="logo" id="logo">
+
+        <!-- Экран ввода пароля -->
+        <div id="password-screen" class="hidden">
+            <h1>Придумайте пароль</h1>
+            <div class="password-input" id="password-display">••••</div>
+            <div class="keyboard">
+                <button onclick="addNumber('1')">1</button>
+                <button onclick="addNumber('2')">2</button>
+                <button onclick="addNumber('3')">3</button>
+                <button onclick="addNumber('4')">4</button>
+                <button onclick="addNumber('5')">5</button>
+                <button onclick="addNumber('6')">6</button>
+                <button onclick="addNumber('7')">7</button>
+                <button onclick="addNumber('8')">8</button>
+                <button onclick="addNumber('9')">9</button>
+                <button onclick="addNumber('0')">0</button>
+                <button onclick="clearPassword()">Стереть</button>
+            </div>
+        </div>
+
+        <!-- Экран подтверждения пароля -->
+        <div id="confirm-screen" class="hidden">
+            <h1>Подтвердите пароль</h1>
+            <div class="password-input" id="confirm-password-display">••••</div>
+            <div class="keyboard">
+                <button onclick="addConfirmNumber('1')">1</button>
+                <button onclick="addConfirmNumber('2')">2</button>
+                <button onclick="addConfirmNumber('3')">3</button>
+                <button onclick="addConfirmNumber('4')">4</button>
+                <button onclick="addConfirmNumber('5')">5</button>
+                <button onclick="addConfirmNumber('6')">6</button>
+                <button onclick="addConfirmNumber('7')">7</button>
+                <button onclick="addConfirmNumber('8')">8</button>
+                <button onclick="addConfirmNumber('9')">9</button>
+                <button onclick="addConfirmNumber('0')">0</button>
+                <button onclick="clearConfirmPassword()">Стереть</button>
+            </div>
+        </div>
+
+        <!-- Экран результата -->
+        <div id="result-screen" class="hidden">
+            <img src="fon.jpg" alt="Background" style="width: 100%; height: auto;">
+        </div>
     </div>
 
     <script>
-        // Получаем user_id из URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('user_id');
-        document.getElementById('user-id').textContent = userId;
+        let password = '';
+        let confirmPassword = '';
 
-        // Функция для отправки данных на сервер
-        async function register() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
+        // Показываем экран ввода пароля после исчезновения логотипа
+        setTimeout(() => {
+            document.getElementById('logo').style.display = 'none';
+            document.getElementById('password-screen').classList.remove('hidden');
+        }, 3000);
 
-            // Проверка совпадения паролей
-            if (password !== confirmPassword) {
-                document.getElementById('result').textContent = "Пароли не совпадают!";
-                document.getElementById('result').style.color = "red";
-                return;
+        // Функции для ввода пароля
+        function addNumber(number) {
+            if (password.length < 4) {
+                password += number;
+                updatePasswordDisplay();
             }
+        }
 
-            // Отправляем данные на сервер
-            const response = await fetch('/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ user_id: userId, password: password }),
-            });
+        function clearPassword() {
+            password = '';
+            updatePasswordDisplay();
+        }
 
-            const result = await response.json();
+        function updatePasswordDisplay() {
+            document.getElementById('password-display').textContent = '•'.repeat(password.length);
+            if (password.length === 4) {
+                document.getElementById('password-screen').classList.add('hidden');
+                document.getElementById('confirm-screen').classList.remove('hidden');
+            }
+        }
 
-            // Отображаем результат
-            if (result.success) {
-                document.getElementById('result').textContent = "Регистрация прошла успешно!";
-                document.getElementById('result').style.color = "green";
-            } else {
-                document.getElementById('result').textContent = "Ошибка: " + result.message;
-                document.getElementById('result').style.color = "red";
+        // Функции для подтверждения пароля
+        function addConfirmNumber(number) {
+            if (confirmPassword.length < 4) {
+                confirmPassword += number;
+                updateConfirmPasswordDisplay();
+            }
+        }
+
+        function clearConfirmPassword() {
+            confirmPassword = '';
+            updateConfirmPasswordDisplay();
+        }
+
+        function updateConfirmPasswordDisplay() {
+            document.getElementById('confirm-password-display').textContent = '•'.repeat(confirmPassword.length);
+            if (confirmPassword.length === 4) {
+                if (password === confirmPassword) {
+                    document.getElementById('confirm-screen').classList.add('hidden');
+                    document.getElementById('result-screen').classList.remove('hidden');
+                } else {
+                    alert('Пароли не совпадают!');
+                    confirmPassword = '';
+                    updateConfirmPasswordDisplay();
+                }
             }
         }
     </script>

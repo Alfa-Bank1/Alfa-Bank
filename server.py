@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
-import bcrypt  # Для хеширования паролей
+import bcrypt
 
 app = Flask(__name__)
 
-# Пример базы данных (в реальном проекте используйте SQLite, PostgreSQL и т.д.)
+# Пример базы данных
 registered_users = {}
 
 # Маршрут для регистрации
@@ -21,7 +21,7 @@ def register():
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
     # Сохраняем пользователя
-    registered_users[user_id] = hashed_password.decode('utf-8')  # Сохраняем хеш в виде строки
+    registered_users[user_id] = hashed_password.decode('utf-8')
 
     return jsonify({"success": True, "message": "Пользователь зарегистрирован!"})
 

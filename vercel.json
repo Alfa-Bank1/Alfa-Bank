@@ -1,23 +1,23 @@
 {
-    "version": 2,
-    "builds": [
+  "version": 2,
+  "builds": [
       {
-        "src": "server.py",
-        "use": "@vercel/python"
+          "src": "server.py",
+          "use": "@vercel/python"
       },
       {
-        "src": "index.html",
-        "use": "@vercel/static"
+          "src": "index.html",
+          "use": "@vercel/static"
       }
-    ],
-    "routes": [
+  ],
+  "routes": [
       {
-        "src": "/",
-        "dest": "index.html"
+          "src": "/",
+          "dest": "index.html"
       },
       {
-        "src": "/register",
-        "dest": "server.py"
+          "src": "/register",
+          "dest": "server.py"
       }
-    ]
-  }
+  ]
+}
