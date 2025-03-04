@@ -1,7 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import bcrypt
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 # Пример базы данных
 registered_users = {}
@@ -28,7 +28,12 @@ def register():
 # Маршрут для отдачи HTML-страницы
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
+    return send_from_directory('.', 'index.html')
+
+# Маршрут для отдачи статических файлов
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)

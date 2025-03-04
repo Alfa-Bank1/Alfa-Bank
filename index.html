@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,157 +13,291 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f2f5;
+            background-color: black;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            overflow: hidden;
         }
         .container {
-            background: white;
+            background: black;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 300px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
         .logo {
             width: 100px;
             height: 100px;
-            animation: fadeOut 3s forwards;
+            animation: fadeOut 5s forwards;
+            border: none;
+            outline: none;
         }
         @keyframes fadeOut {
             0% { opacity: 1; }
-            100% { opacity: 0; display: none; }
+            50% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        h1 {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 100px;
+            display: none;
         }
         .password-input {
-            font-size: 24px;
-            letter-spacing: 10px;
-            margin: 20px 0;
+            font-size: 80px;
+            margin: 100px 0 0 0;
+            color: white;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            display: none;
+        }
+        .password-input .dot {
+            color: white;
+            transition: color 0.4s;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+        }
+        .password-input .dot.filled {
+            background-color: rgb(255, 0, 0);
         }
         .keyboard {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
+            margin-top: 50px;
+            margin-bottom: -10px;
+            display: none;
         }
         .keyboard button {
-            padding: 20px;
-            font-size: 18px;
+            padding: 30px;
+            font-size: 28px;
             border: none;
-            border-radius: 5px;
-            background-color: #007bff;
+            border-radius: 50%;
+            background-color: #333;
             color: white;
             cursor: pointer;
-        }
-        .keyboard button:hover {
-            background-color: #0056b3;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.4s;
+            outline: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .keyboard button:active {
-            background-color: #004080;
+            background-color: #cc0000;
+        }
+        .keyboard button:nth-child(10) {
+            grid-column: 2;
+        }
+        .keyboard button:nth-child(11) {
+            grid-column: 3;
         }
         .hidden {
             display: none;
         }
+        .logo-container {
+            background: transparent;
+            box-shadow: none;
+            padding: 0;
+        }
+        #result-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Убедитесь, что элемент находится поверх других */
+        }
+        #result-screen img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container logo-container" id="logo-container">
         <!-- Логотип -->
-        <img src="logo.png" alt="Logo" class="logo" id="logo">
+        <img src="static/logo.png" alt="Logo" class="logo" id="logo">
 
         <!-- Экран ввода пароля -->
         <div id="password-screen" class="hidden">
-            <h1>Придумайте пароль</h1>
-            <div class="password-input" id="password-display">••••</div>
-            <div class="keyboard">
-                <button onclick="addNumber('1')">1</button>
-                <button onclick="addNumber('2')">2</button>
-                <button onclick="addNumber('3')">3</button>
-                <button onclick="addNumber('4')">4</button>
-                <button onclick="addNumber('5')">5</button>
-                <button onclick="addNumber('6')">6</button>
-                <button onclick="addNumber('7')">7</button>
-                <button onclick="addNumber('8')">8</button>
-                <button onclick="addNumber('9')">9</button>
-                <button onclick="addNumber('0')">0</button>
-                <button onclick="clearPassword()">Стереть</button>
+            <h1 id="password-title">Придумайте пароль</h1>
+            <div class="password-input" id="password-display">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
             </div>
         </div>
 
         <!-- Экран подтверждения пароля -->
         <div id="confirm-screen" class="hidden">
-            <h1>Подтвердите пароль</h1>
-            <div class="password-input" id="confirm-password-display">••••</div>
-            <div class="keyboard">
-                <button onclick="addConfirmNumber('1')">1</button>
-                <button onclick="addConfirmNumber('2')">2</button>
-                <button onclick="addConfirmNumber('3')">3</button>
-                <button onclick="addConfirmNumber('4')">4</button>
-                <button onclick="addConfirmNumber('5')">5</button>
-                <button onclick="addConfirmNumber('6')">6</button>
-                <button onclick="addConfirmNumber('7')">7</button>
-                <button onclick="addConfirmNumber('8')">8</button>
-                <button onclick="addConfirmNumber('9')">9</button>
-                <button onclick="addConfirmNumber('0')">0</button>
-                <button onclick="clearConfirmPassword()">Стереть</button>
+            <h1 id="confirm-title">Подтвердите пароль</h1>
+            <div class="password-input" id="confirm-password-display">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
             </div>
         </div>
 
-        <!-- Экран результата -->
-        <div id="result-screen" class="hidden">
-            <img src="fon.jpg" alt="Background" style="width: 100%; height: auto;">
+        <!-- Клавиатура -->
+        <div class="keyboard" id="keyboard">
+            <button onclick="addNumber('1')">1</button>
+            <button onclick="addNumber('2')">2</button>
+            <button onclick="addNumber('3')">3</button>
+            <button onclick="addNumber('4')">4</button>
+            <button onclick="addNumber('5')">5</button>
+            <button onclick="addNumber('6')">6</button>
+            <button onclick="addNumber('7')">7</button>
+            <button onclick="addNumber('8')">8</button>
+            <button onclick="addNumber('9')">9</button>
+            <button onclick="addNumber('0')">0</button>
+            <button onclick="clearPassword()">⌫</button>
         </div>
+    </div>
+
+    <!-- Экран результата (полноэкранный) -->
+    <div id="result-screen" class="hidden">
+        <img src="static/F.jpg" alt="Background">
     </div>
 
     <script>
         let password = '';
         let confirmPassword = '';
+        let isConfirming = false;
 
-        // Показываем экран ввода пароля после исчезновения логотипа
+        // Получаем данные пользователя из Telegram Web App
+        const tg = window.Telegram.WebApp;
+        const user = tg.initDataUnsafe.user;
+
+        if (!user) {
+            console.error("Пользователь не авторизован в Telegram.");
+            alert("Пожалуйста, авторизуйтесь в Telegram для использования приложения.");
+        }
+
+        // Показываем экран ввода пароля, точки и клавиатуру после исчезновения логотипа
         setTimeout(() => {
             document.getElementById('logo').style.display = 'none';
+            document.body.style.backgroundColor = 'black';
+            document.getElementById('logo-container').classList.remove('logo-container');
+
+            // Показываем элементы ввода пароля
             document.getElementById('password-screen').classList.remove('hidden');
-        }, 3000);
+            document.getElementById('password-title').style.display = 'block';
+            document.getElementById('password-display').style.display = 'flex';
+            document.getElementById('keyboard').style.display = 'grid';
+        }, 5000);
 
         // Функции для ввода пароля
         function addNumber(number) {
-            if (password.length < 4) {
-                password += number;
-                updatePasswordDisplay();
+            if (isConfirming) {
+                if (confirmPassword.length < 4) {
+                    confirmPassword += number;
+                    updateConfirmPasswordDisplay();
+                }
+            } else {
+                if (password.length < 4) {
+                    password += number;
+                    updatePasswordDisplay();
+                }
             }
         }
 
         function clearPassword() {
-            password = '';
-            updatePasswordDisplay();
+            if (isConfirming) {
+                if (confirmPassword.length > 0) {
+                    confirmPassword = confirmPassword.slice(0, -1);
+                    updateConfirmPasswordDisplay();
+                }
+            } else {
+                if (password.length > 0) {
+                    password = password.slice(0, -1);
+                    updatePasswordDisplay();
+                }
+            }
         }
 
         function updatePasswordDisplay() {
-            document.getElementById('password-display').textContent = '•'.repeat(password.length);
-            if (password.length === 4) {
+            const dots = document.querySelectorAll('#password-display .dot');
+            dots.forEach((dot, index) => {
+                if (index < password.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            });
+
+            if (password.length === 4 && dots[3].classList.contains('filled')) {
                 document.getElementById('password-screen').classList.add('hidden');
                 document.getElementById('confirm-screen').classList.remove('hidden');
-            }
-        }
 
-        // Функции для подтверждения пароля
-        function addConfirmNumber(number) {
-            if (confirmPassword.length < 4) {
-                confirmPassword += number;
-                updateConfirmPasswordDisplay();
-            }
-        }
+                document.getElementById('confirm-title').style.display = 'block';
+                document.getElementById('confirm-password-display').style.display = 'flex';
 
-        function clearConfirmPassword() {
-            confirmPassword = '';
-            updateConfirmPasswordDisplay();
+                isConfirming = true;
+            }
         }
 
         function updateConfirmPasswordDisplay() {
-            document.getElementById('confirm-password-display').textContent = '•'.repeat(confirmPassword.length);
-            if (confirmPassword.length === 4) {
-                if (password === confirmPassword) {
-                    document.getElementById('confirm-screen').classList.add('hidden');
-                    document.getElementById('result-screen').classList.remove('hidden');
+            const dots = document.querySelectorAll('#confirm-password-display .dot');
+            dots.forEach((dot, index) => {
+                if (index < confirmPassword.length) {
+                    dot.classList.add('filled');
                 } else {
+                    dot.classList.remove('filled');
+                }
+            });
+
+            if (confirmPassword.length === 4 && dots[3].classList.contains('filled')) {
+                if (password === confirmPassword) {
+                    console.log("Пароли совпадают. Показываем экран результата.");
+                    document.getElementById('logo-container').style.display = 'none';
+                    document.getElementById('keyboard').style.display = 'none';
+
+                    // Показываем экран результата
+                    const resultScreen = document.getElementById('result-screen');
+                    const resultImage = resultScreen.querySelector('img');
+
+                    resultImage.onload = function () {
+                        console.log("Изображение загружено.");
+                        resultScreen.classList.remove('hidden');
+                    };
+
+                    resultImage.onerror = function () {
+                        console.error("Ошибка загрузки изображения.");
+                    };
+                } else {
+                    console.log("Пароли не совпадают.");
                     alert('Пароли не совпадают!');
+                    password = '';
                     confirmPassword = '';
+                    isConfirming = false; // Возвращаемся к вводу пароля
+                    document.getElementById('password-screen').classList.remove('hidden');
+                    document.getElementById('confirm-screen').classList.add('hidden');
+                    updatePasswordDisplay();
                     updateConfirmPasswordDisplay();
                 }
             }
